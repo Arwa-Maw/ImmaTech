@@ -22,7 +22,7 @@ const STEPS = [
         id: 2,
         name: "Carte Mere",
         modelFile: "assets/models/asus_strix_b-550-f_gaming_motherboard_realistic.glb",
-        modelScale: "0.008 0.008 0.008",
+        modelScale: "0.04 0.04 0.04",
         modelPosition: "0 0.2 0",
         modelRotation: "0 0 0",
         quiz: {
@@ -41,7 +41,7 @@ const STEPS = [
         id: 3,
         name: "Processeur (CPU)",
         modelFile: "assets/models/intel_cpu.glb",
-        modelScale: "0.008 0.008 0.008",
+        modelScale: "0.03 0.03 0.03",
         modelPosition: "0 0.2 0",
         modelRotation: "0 0 0",
         quiz: {
@@ -60,7 +60,7 @@ const STEPS = [
         id: 4,
         name: "Watercooling CPU",
         modelFile: "assets/models/corsair_h150i_elitie_cpu_liquid_cooler.glb",
-        modelScale: "0.008 0.008 0.008",
+        modelScale: "0.04 0.04 0.04",
         modelPosition: "0 0.25 0",
         modelRotation: "0 0 0",
         quiz: {
@@ -98,7 +98,7 @@ const STEPS = [
         id: 6,
         name: "Carte Graphique (GPU)",
         modelFile: "assets/models/asus_rog_geforce_rtx_4090_v2_0.glb",
-        modelScale: "0.008 0.008 0.008",
+        modelScale: "0.04 0.04 0.04",
         modelPosition: "0 0.2 0",
         modelRotation: "0 0 0",
         quiz: {
@@ -136,7 +136,7 @@ const STEPS = [
 
 const FINAL_MODEL = {
     file: "assets/models/custom_gaming_pc.glb",
-    scale: "0.008 0.008 0.008",
+    scale: "0.03 0.03 0.03",
     position: "0 0.15 0",
     rotation: "0 0 0"
 };
