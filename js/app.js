@@ -1,3 +1,15 @@
+/* ============================================================ */
+/*  PC Builder AR — ImmaTech · Cyberpunk Edition                */
+/*  app.js — Logique principale                                 */
+/*  Auteurs : Mounir, Matteo, Marwan                            */
+/* ============================================================ */
+
+// ========================
+// CONFIGURATION DES ETAPES
+// ========================
+// modelScale / modelPosition / modelRotation : ajuster selon vos modeles GLB.
+// Chaque modele a ses propres proportions — modifiez ces valeurs si necessaire.
+
 const STEPS = [
     {
         id: 1,
@@ -22,8 +34,8 @@ const STEPS = [
         id: 2,
         name: "Carte Mere",
         modelFile: "assets/models/asus_strix_b-550-f_gaming_motherboard_realistic.glb",
-        modelScale: "0.03 0.03 0.03",
-        modelPosition: "0 0 0",
+        modelScale: "0.1 0.1 0.1",
+        modelPosition: "0 0.2 0",
         modelRotation: "-90 0 0",
         quiz: {
             question: "Quel composant sert de circuit principal pour connecter tous les autres ?",
@@ -134,6 +146,7 @@ const STEPS = [
     }
 ];
 
+// Modele final affiche apres toutes les etapes
 const FINAL_MODEL = {
     file: "assets/models/custom_gaming_pc.glb",
     scale: "0.005 0.005 0.005",
@@ -141,6 +154,9 @@ const FINAL_MODEL = {
     rotation: "0 0 0"
 };
 
+// ========================
+// ETAT DU JEU
+// ========================
 let gameState = {
     currentStep: 0,
     score: 0,
@@ -148,53 +164,47 @@ let gameState = {
     totalErrors: 0,
     startTime: null,
     markerFound: false,
-    phase: 'welcome',
+    phase: 'welcome',  // welcome | quiz | transition | complete
     musicPlaying: false,
     currentModelEntity: null
 };
 
 const POINTS_QUIZ_PERFECT = 100;
-const POINTS_QUIZ_RETRY = 50;
-const PENALTY_WRONG = -20;
+const POINTS_QUIZ_RETRY   = 50;
+const PENALTY_WRONG        = -20;
 
+// Audio
 let bgMusic = null;
 let audioCtx = null;
 
+// ========================
+// INITIALISATION
+// ========================
 document.addEventListener('DOMContentLoaded', function () {
+    // Marker detection
     var marker = document.querySelector('#main-marker');
-
     if (marker) {
         marker.addEventListener('markerFound', function () {
-            console.log('Marqueur HIRO detecte !');
             gameState.markerFound = true;
             updateMarkerStatus(true);
         });
-
         marker.addEventListener('markerLost', function () {
-            console.log('Marqueur HIRO perdu');
             gameState.markerFound = false;
             updateMarkerStatus(false);
         });
     }
 
+    // Init background music element
     bgMusic = document.getElementById('bg-music');
     if (bgMusic) {
         bgMusic.volume = 0.25;
         bgMusic.loop = true;
     }
-
-    var scene = document.querySelector('a-scene');
-    if (scene) {
-        if (scene.hasLoaded) {
-            console.log('Scene AR chargee');
-        } else {
-            scene.addEventListener('loaded', function () {
-                console.log('Scene AR chargee');
-            });
-        }
-    }
 });
 
+// ========================
+// MUSIQUE
+// ========================
 function toggleMusic() {
     var btn = document.getElementById('music-btn');
     if (!bgMusic) return;
@@ -221,6 +231,9 @@ function startMusic() {
     }).catch(function () { });
 }
 
+// ========================
+// SOUND EFFECTS (Web Audio API)
+// ========================
 function initAudioCtx() {
     if (!audioCtx) {
         audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -261,10 +274,12 @@ function sfxComplete() {
     });
 }
 
+// ========================
+// DEMARRAGE
+// ========================
 function startExperience() {
     document.getElementById('welcome-screen').classList.add('hidden');
     document.getElementById('hud').classList.remove('hidden');
-    document.getElementById('music-btn').classList.remove('hidden');
 
     addMarkerStatus();
     startMusic();
@@ -275,6 +290,9 @@ function startExperience() {
     startStep(0);
 }
 
+// ========================
+// GESTION DES ETAPES
+// ========================
 function startStep(stepIndex) {
     if (stepIndex >= STEPS.length) {
         finishGame();
@@ -288,17 +306,25 @@ function startStep(stepIndex) {
 
     updateHUD(stepIndex);
 
+    // Show component name
     var nameEl = document.getElementById('component-name');
     if (nameEl) {
         nameEl.textContent = '[ ' + step.name + ' ]';
         nameEl.classList.add('visible');
     }
 
+    // Instruction
     document.getElementById('instruction-text').textContent =
         'Diagnostic en cours — identifiez : ' + step.name;
 
+    // Load and display the 3D model on the marker
     loadComponentModel(step);
+
+    // Show quiz
     showQuiz(step.quiz);
+
+    // Hide action button
+    document.getElementById('btn-action').classList.add('hidden');
 }
 
 function updateHUD(stepIndex) {
@@ -310,70 +336,66 @@ function updateHUD(stepIndex) {
     document.getElementById('progress-fill').style.width = progress + '%';
 }
 
+// ========================
+// 3D MODEL MANAGEMENT
+// ========================
 function loadComponentModel(step) {
     var marker = document.querySelector('#main-marker');
     if (!marker) return;
 
+    // Remove previous model if exists
     removeCurrentModel();
 
+    // Show loading indicator
     var loader = document.getElementById('loading-model');
     if (loader) loader.classList.add('active');
 
-    var wrapper = document.createElement('a-entity');
-    wrapper.setAttribute('id', 'current-component');
-    wrapper.setAttribute('position', step.modelPosition);
-    wrapper.setAttribute('scale', '0 0 0');
-    wrapper.setAttribute('rotation', step.modelRotation);
+    // Create new entity
+    var entity = document.createElement('a-entity');
+    entity.setAttribute('id', 'current-component');
+    entity.setAttribute('gltf-model', 'url(' + step.modelFile + ')');
+    entity.setAttribute('position', step.modelPosition);
+    entity.setAttribute('scale', '0 0 0');
+    entity.setAttribute('rotation', step.modelRotation);
 
-    var inner = document.createElement('a-entity');
-    inner.setAttribute('gltf-model', 'url(' + step.modelFile + ')');
-
-    inner.addEventListener('model-loaded', function () {
+    // When model loads, animate it in
+    entity.addEventListener('model-loaded', function () {
+        // Hide loading indicator
         if (loader) loader.classList.remove('active');
-        centerModel(inner);
 
-        wrapper.setAttribute('animation__scalein', {
+        // Scale-in animation
+        entity.setAttribute('animation__scalein', {
             property: 'scale',
             from: '0 0 0',
             to: step.modelScale,
             dur: 800,
             easing: 'easeOutBack'
         });
+
+        // Continuous rotation (sauf si desactive pour ce composant)
+        if (step.rotate !== false) {
+            entity.setAttribute('animation__rotate', {
+                property: 'rotation',
+                from: step.modelRotation,
+                to: rotateY360(step.modelRotation),
+                dur: 10000,
+                loop: true,
+                easing: 'linear'
+            });
+        }
     });
 
-    inner.addEventListener('model-error', function () {
+    entity.addEventListener('model-error', function () {
         if (loader) loader.classList.remove('active');
         console.warn('Erreur chargement modele:', step.modelFile);
     });
 
-    wrapper.appendChild(inner);
-    marker.appendChild(wrapper);
-    gameState.currentModelEntity = wrapper;
-}
-
-function centerModel(inner) {
-    var mesh = inner.getObject3D('mesh');
-    if (!mesh) return;
-    var wrapper = inner.parentNode && inner.parentNode.object3D;
-    var savedScale = null;
-    if (wrapper) {
-        savedScale = wrapper.scale.clone();
-        wrapper.scale.set(1, 1, 1);
-        wrapper.updateMatrixWorld(true);
-    }
-    var bbox = new THREE.Box3().setFromObject(mesh);
-    var center = bbox.getCenter(new THREE.Vector3());
-    var minY = bbox.min.y;
-    if (wrapper && savedScale) {
-        wrapper.scale.copy(savedScale);
-        wrapper.updateMatrixWorld(true);
-    }
-    // Center X/Z on the marker, sit the model's base on the marker plane (Y).
-    inner.setAttribute('position',
-        (-center.x) + ' ' + (-minY) + ' ' + (-center.z));
+    marker.appendChild(entity);
+    gameState.currentModelEntity = entity;
 }
 
 function rotateY360(baseRotation) {
+    // Parse base rotation and add 360 to Y
     var parts = baseRotation.split(' ').map(Number);
     return parts[0] + ' ' + (parts[1] + 360) + ' ' + parts[2];
 }
@@ -400,38 +422,48 @@ function showFinalModel() {
         loader.classList.add('active');
     }
 
-    var wrapper = document.createElement('a-entity');
-    wrapper.setAttribute('id', 'final-pc-model');
-    wrapper.setAttribute('position', FINAL_MODEL.position);
-    wrapper.setAttribute('scale', '0 0 0');
-    wrapper.setAttribute('rotation', FINAL_MODEL.rotation);
+    var entity = document.createElement('a-entity');
+    entity.setAttribute('id', 'final-pc-model');
+    entity.setAttribute('gltf-model', 'url(' + FINAL_MODEL.file + ')');
+    entity.setAttribute('position', FINAL_MODEL.position);
+    entity.setAttribute('scale', '0 0 0');
+    entity.setAttribute('rotation', FINAL_MODEL.rotation);
 
-    var inner = document.createElement('a-entity');
-    inner.setAttribute('gltf-model', 'url(' + FINAL_MODEL.file + ')');
-
-    inner.addEventListener('model-loaded', function () {
+    entity.addEventListener('model-loaded', function () {
         if (loader) loader.classList.remove('active');
-        centerModel(inner);
 
-        wrapper.setAttribute('animation__scalein', {
+        // Epic scale-in
+        entity.setAttribute('animation__scalein', {
             property: 'scale',
             from: '0 0 0',
             to: FINAL_MODEL.scale,
             dur: 2000,
             easing: 'easeOutElastic'
         });
+
+        // Continuous rotation
+        entity.setAttribute('animation__rotate', {
+            property: 'rotation',
+            from: FINAL_MODEL.rotation,
+            to: rotateY360(FINAL_MODEL.rotation),
+            dur: 12000,
+            loop: true,
+            easing: 'linear'
+        });
     });
 
-    inner.addEventListener('model-error', function () {
+    entity.addEventListener('model-error', function () {
         if (loader) loader.classList.remove('active');
         console.warn('Erreur chargement modele final');
     });
 
-    wrapper.appendChild(inner);
-    marker.appendChild(wrapper);
-    gameState.currentModelEntity = wrapper;
+    marker.appendChild(entity);
+    gameState.currentModelEntity = entity;
 }
 
+// ========================
+// SYSTEME DE QUIZ
+// ========================
 function showQuiz(quiz) {
     var panel = document.getElementById('quiz-panel');
     var questionEl = document.getElementById('quiz-question');
@@ -466,6 +498,7 @@ function handleQuizAnswer(selectedIndex, quiz, selectedBtn, optionsEl, feedbackE
     selectedBtn.classList.add(isCorrect ? 'correct' : 'wrong');
 
     if (isCorrect) {
+        // Disable all options
         var allBtns = optionsEl.querySelectorAll('.quiz-option');
         for (var i = 0; i < allBtns.length; i++) {
             allBtns[i].classList.add('disabled');
@@ -488,15 +521,18 @@ function handleQuizAnswer(selectedIndex, quiz, selectedBtn, optionsEl, feedbackE
         feedbackEl.classList.remove('hidden');
         document.getElementById('score-label').textContent = 'SCORE ' + gameState.score;
 
+        // Effects
         sfxCorrect();
         triggerFlash('correct');
         triggerParticles(30, 'var(--green)');
         showScorePopup('+' + points, true);
 
+        // Transition to next step
         setTimeout(function () {
             document.getElementById('quiz-panel').classList.add('hidden');
             gameState.phase = 'transition';
 
+            // Brief pause to admire the model, then next
             document.getElementById('instruction-text').textContent =
                 step_name_at(gameState.currentStep) + ' > identifie. Chargement suivant...';
 
@@ -519,6 +555,7 @@ function handleQuizAnswer(selectedIndex, quiz, selectedBtn, optionsEl, feedbackE
         selectedBtn.classList.add('disabled');
         document.getElementById('score-label').textContent = 'SCORE ' + gameState.score;
 
+        // Effects
         sfxWrong();
         triggerFlash('wrong');
         triggerGlitch();
@@ -530,6 +567,9 @@ function step_name_at(index) {
     return STEPS[index] ? STEPS[index].name : '';
 }
 
+// ========================
+// VISUAL EFFECTS
+// ========================
 function triggerFlash(type) {
     var flash = document.getElementById('flash-overlay');
     if (!flash) return;
@@ -562,6 +602,7 @@ function triggerParticles(count, color) {
 
         container.appendChild(p);
 
+        // Cleanup
         (function (el) {
             setTimeout(function () {
                 if (el.parentNode) el.parentNode.removeChild(el);
@@ -587,6 +628,9 @@ function showScorePopup(text, positive) {
     }, 1300);
 }
 
+// ========================
+// MARKER STATUS
+// ========================
 function addMarkerStatus() {
     var statusEl = document.createElement('div');
     statusEl.id = 'marker-status';
@@ -608,14 +652,19 @@ function updateMarkerStatus(found) {
     }
 }
 
+// ========================
+// FIN DU JEU
+// ========================
 function finishGame() {
     gameState.phase = 'complete';
 
+    // Calculate time
     var elapsed = Date.now() - gameState.startTime;
     var minutes = Math.floor(elapsed / 60000);
     var seconds = Math.floor((elapsed % 60000) / 1000);
     var timeStr = minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
 
+    // Calculate rank
     var maxScore = POINTS_QUIZ_PERFECT * STEPS.length;
     var percentage = (gameState.score / maxScore) * 100;
 
@@ -634,10 +683,12 @@ function finishGame() {
         message = 'Termine. Revoyez les fondamentaux et retentez.';
     }
 
+    // Effects
     sfxComplete();
     triggerFlash('complete');
     triggerParticles(50, 'var(--cyan)');
 
+    // Update HUD
     document.getElementById('progress-fill').style.width = '100%';
     document.getElementById('step-label').textContent = 'TERMINE';
 
@@ -650,8 +701,10 @@ function finishGame() {
     document.getElementById('instruction-text').textContent =
         'PC assemble avec succes. Admirez votre build en 3D.';
 
+    // Show the final complete PC model
     showFinalModel();
 
+    // Show end screen after delay
     setTimeout(function () {
         document.getElementById('hud').classList.add('hidden');
         var endScreen = document.getElementById('end-screen');
@@ -668,6 +721,9 @@ function finishGame() {
     }, 5000);
 }
 
+// ========================
+// RECOMMENCER
+// ========================
 function restartExperience() {
     gameState = {
         currentStep: 0,
@@ -681,13 +737,16 @@ function restartExperience() {
         currentModelEntity: null
     };
 
+    // Remove any model on marker
     removeCurrentModel();
 
+    // Also remove final model if present
     var finalModel = document.querySelector('#final-pc-model');
     if (finalModel && finalModel.parentNode) {
         finalModel.parentNode.removeChild(finalModel);
     }
 
+    // UI reset
     document.getElementById('end-screen').classList.add('hidden');
     document.getElementById('hud').classList.remove('hidden');
     document.getElementById('progress-fill').style.width = '0%';
