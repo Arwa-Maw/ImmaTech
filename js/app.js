@@ -1,203 +1,545 @@
 /* ============================================================ */
-/*  PC Builder AR — ImmaTech · Cyberpunk Edition                */
-/*  app.js — Logique principale                                 */
+/*  PC Builder AR — ImmaTech · Cyberpunk UI                     */
 /*  Auteurs : Mounir, Matteo, Marwan                            */
 /* ============================================================ */
 
-// ========================
-// CONFIGURATION DES ETAPES
-// ========================
-// modelScale / modelPosition / modelRotation : ajuster selon vos modeles GLB.
-// Chaque modele a ses propres proportions — modifiez ces valeurs si necessaire.
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
 
-const STEPS = [
-    {
-        id: 1,
-        name: "Alimentation (PSU)",
-        modelFile: "assets/models/psu_power_supply_unit.glb",
-        modelScale: "3 3 3",
-        modelPosition: "0 0.25 0",
-        modelRotation: "0 0 0",
-        quiz: {
-            question: "Quel composant fournit l'energie electrique a tout le PC ?",
-            options: [
-                "La carte graphique (GPU)",
-                "L'alimentation (PSU)",
-                "La carte mere",
-                "Le processeur (CPU)"
-            ],
-            correctIndex: 1,
-            explanation: "L'alimentation (PSU) convertit le courant alternatif en courant continu pour alimenter tous les composants."
-        }
-    },
-    {
-        id: 2,
-        name: "Carte Mere",
-        modelFile: "assets/models/asus_strix_b-550-f_gaming_motherboard_realistic.glb",
-        modelScale: "0.3 0.3 0.3",
-        modelPosition: "0 0.2 0",
-        modelRotation: "0 0 0",
-        quiz: {
-            question: "Quel composant sert de circuit principal pour connecter tous les autres ?",
-            options: [
-                "Le disque SSD",
-                "Le boitier",
-                "La carte mere",
-                "Le ventirad"
-            ],
-            correctIndex: 2,
-            explanation: "La carte mere est le PCB principal ou se connectent le CPU, la RAM, le GPU et tous les peripheriques."
-        }
-    },
-    {
-        id: 3,
-        name: "Processeur (CPU)",
-        modelFile: "assets/models/intel_cpu.glb",
-        modelScale: "0.3 0.3 0.3",
-        modelPosition: "0 0.2 0",
-        modelRotation: "0 0 0",
-        quiz: {
-            question: "Ou s'installe le processeur (CPU) ?",
-            options: [
-                "Sur le slot PCI-Express",
-                "Dans le socket de la carte mere",
-                "A cote de l'alimentation",
-                "Derriere la carte graphique"
-            ],
-            correctIndex: 1,
-            explanation: "Le CPU s'installe sur le socket dedie de la carte mere (LGA ou AM5 selon la marque)."
-        }
-    },
-    {
-        id: 4,
-        name: "Watercooling CPU",
-        modelFile: "assets/models/corsair_h150i_elitie_cpu_liquid_cooler.glb",
-        modelScale: "0.3 0.3 0.3",
-        modelPosition: "0 0.25 0",
-        modelRotation: "0 0 0",
-        quiz: {
-            question: "Pourquoi installe-t-on un systeme de refroidissement sur le CPU ?",
-            options: [
-                "Pour le proteger de la poussiere",
-                "Pour le refroidir et eviter la surchauffe",
-                "Pour augmenter sa puissance",
-                "Pour reduire le bruit"
-            ],
-            correctIndex: 1,
-            explanation: "Le systeme de refroidissement dissipe la chaleur produite par le CPU. Sans lui, le processeur surchauffe."
-        }
-    },
-    {
-        id: 5,
-        name: "Memoire RAM",
-        modelFile: "assets/models/ram_corsair_vengeance_ddr4_rgb_pro.glb",
-        modelScale: "3 3 3",
-        modelPosition: "0 0.2 0",
-        modelRotation: "0 0 0",
-        quiz: {
-            question: "Quel est le role principal de la RAM ?",
-            options: [
-                "Stocker les fichiers de maniere permanente",
-                "Afficher les graphismes",
-                "Stocker temporairement les donnees en cours d'utilisation",
-                "Connecter le PC a Internet"
-            ],
-            correctIndex: 2,
-            explanation: "La RAM est une memoire volatile ultra-rapide qui stocke les donnees utilisees en temps reel."
-        }
-    },
-    {
-        id: 6,
-        name: "Carte Graphique (GPU)",
-        modelFile: "assets/models/asus_rog_geforce_rtx_4090_v2_0.glb",
-        modelScale: "0.3 0.3 0.3",
-        modelPosition: "0 0.2 0",
-        modelRotation: "0 0 0",
-        quiz: {
-            question: "Dans quel slot s'installe generalement une carte graphique ?",
-            options: [
-                "Slot M.2",
-                "Slot PCI-Express x16",
-                "Slot SATA",
-                "Slot RAM DDR5"
-            ],
-            correctIndex: 1,
-            explanation: "Le GPU s'insere dans le slot PCI-Express x16 pour la bande passante necessaire aux donnees graphiques."
-        }
-    },
-    {
-        id: 7,
-        name: "Stockage SSD NVMe",
-        modelFile: "assets/models/m_2_nvme_ssd_samsung_990_pro_1tb_3d_model.glb",
-        modelScale: "3 3 3",
-        modelPosition: "0 0.2 0",
-        modelRotation: "0 0 0",
-        quiz: {
-            question: "Quel avantage principal a un SSD par rapport a un HDD ?",
-            options: [
-                "Il est plus grand",
-                "Il consomme plus d'energie",
-                "Il est beaucoup plus rapide en lecture/ecriture",
-                "Il stocke plus de donnees"
-            ],
-            correctIndex: 2,
-            explanation: "Les SSD utilisent de la memoire flash, 5 a 20 fois plus rapide qu'un disque dur mecanique."
-        }
+:root {
+    --cyan: #00f0ff;
+    --cyan-dim: #007a82;
+    --magenta: #ff2a6d;
+    --magenta-dim: #8a1538;
+    --yellow: #ffd700;
+    --green: #00ff9f;
+    --red: #ff3333;
+    --bg-void: #05050a;
+    --bg-panel: rgba(8, 8, 20, 0.92);
+    --bg-glass: rgba(8, 8, 20, 0.78);
+    --border-glow: rgba(0, 240, 255, 0.25);
+    --text-primary: #e8e8f0;
+    --text-dim: #6a6a80;
+    --font-display: 'Orbitron', monospace;
+    --font-body: 'Rajdhani', sans-serif;
+    --font-mono: 'Share Tech Mono', monospace;
+    --radius: 4px;
+    --glow-cyan: 0 0 20px rgba(0, 240, 255, 0.3), 0 0 60px rgba(0, 240, 255, 0.1);
+    --glow-magenta: 0 0 20px rgba(255, 42, 109, 0.3), 0 0 60px rgba(255, 42, 109, 0.1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+    font-family: var(--font-body);
+    overflow: hidden;
+    background: var(--bg-void);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+}
+
+.hidden { display: none !important; }
+
+/* ======================== */
+/* SCANLINES OVERLAY        */
+/* ======================== */
+.scanlines {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 99999;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.08) 2px,
+        rgba(0, 0, 0, 0.08) 4px
+    );
+    mix-blend-mode: multiply;
+}
+
+/* ======================== */
+/* GRID BACKGROUND          */
+/* ======================== */
+.cyber-grid {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: -1;
+    background-image:
+        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+
+/* ======================== */
+/* GLITCH TEXT EFFECT       */
+/* ======================== */
+@keyframes glitch-shift {
+    0%, 100% { text-shadow: 2px 0 var(--magenta), -2px 0 var(--cyan); }
+    25% { text-shadow: -2px -1px var(--magenta), 2px 1px var(--cyan); }
+    50% { text-shadow: 1px 2px var(--magenta), -1px -2px var(--cyan); }
+    75% { text-shadow: -1px 1px var(--magenta), 1px -1px var(--cyan); }
+}
+
+@keyframes glitch-flicker {
+    0%, 100% { opacity: 1; }
+    92% { opacity: 1; }
+    93% { opacity: 0.7; }
+    94% { opacity: 1; }
+    96% { opacity: 0.8; }
+    97% { opacity: 1; }
+}
+
+.glitch-text {
+    animation: glitch-shift 4s ease-in-out infinite, glitch-flicker 6s linear infinite;
+}
+
+/* ======================== */
+/* OVERLAY SCREENS          */
+/* ======================== */
+.overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-void);
+}
+
+.overlay::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background:
+        radial-gradient(ellipse at 20% 30%, rgba(0, 240, 255, 0.06) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 70%, rgba(255, 42, 109, 0.04) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(0, 240, 255, 0.02) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+/* ======================== */
+/* WELCOME SCREEN           */
+/* ======================== */
+.welcome-container, .end-container {
+    text-align: center;
+    padding: 2.5rem 2rem;
+    max-width: 440px;
+    width: 92%;
+    position: relative;
+    z-index: 1;
+}
+
+.logo-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 1.2rem;
+    border: 2px solid var(--cyan);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    animation: logo-pulse 3s ease-in-out infinite;
+}
+
+.logo-icon::before {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border: 1px solid rgba(0, 240, 255, 0.2);
+}
+
+.logo-icon svg {
+    width: 32px;
+    height: 32px;
+    fill: var(--cyan);
+}
+
+@keyframes logo-pulse {
+    0%, 100% { box-shadow: var(--glow-cyan); }
+    50% { box-shadow: 0 0 30px rgba(0, 240, 255, 0.5), 0 0 80px rgba(0, 240, 255, 0.15); }
+}
+
+.welcome-container h1, .end-container h1 {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    font-weight: 900;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 0.2rem;
+    color: #fff;
+}
+
+.highlight-cyan { color: var(--cyan); }
+.highlight-magenta { color: var(--magenta); }
+
+.subtitle {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--magenta);
+    text-transform: uppercase;
+    letter-spacing: 6px;
+    font-weight: 400;
+    margin-bottom: 1.8rem;
+    opacity: 0.9;
+}
+
+.separator {
+    width: 60px;
+    height: 1px;
+    margin: 0 auto 1.5rem;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+}
+
+.description {
+    font-size: 0.95rem;
+    color: var(--text-dim);
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+    font-weight: 400;
+}
+
+.team-info {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    margin-bottom: 2rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+}
+.team-info span {
+    color: var(--cyan);
+    font-weight: 400;
+}
+
+/* PRIMARY BUTTON */
+.btn-primary {
+    display: inline-block;
+    padding: 14px 48px;
+    background: transparent;
+    color: var(--cyan);
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    border: 1px solid var(--cyan);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.15), transparent);
+    transition: left 0.5s ease;
+}
+
+.btn-primary:hover {
+    background: rgba(0, 240, 255, 0.08);
+    box-shadow: var(--glow-cyan);
+}
+
+.btn-primary:hover::before {
+    left: 100%;
+}
+
+.btn-primary:active {
+    background: rgba(0, 240, 255, 0.15);
+}
+
+.hint {
+    margin-top: 1.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    opacity: 0.6;
+}
+
+/* ======================== */
+/* HUD                      */
+/* ======================== */
+.hud {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 100;
+    pointer-events: none;
+}
+.hud > * { pointer-events: auto; }
+
+.hud-top {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    padding: 14px 16px 20px;
+    background: linear-gradient(to bottom, rgba(5, 5, 10, 0.85) 0%, rgba(5, 5, 10, 0.4) 70%, transparent 100%);
+}
+
+.progress-container {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 400;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+#step-label { color: var(--cyan); }
+#score-label { color: var(--yellow); }
+
+.progress-bar {
+    width: 100%;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--cyan);
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    box-shadow: 0 0 10px var(--cyan);
+}
+
+.progress-fill::after {
+    content: '';
+    position: absolute;
+    right: 0; top: -2px;
+    width: 2px; height: 7px;
+    background: var(--cyan);
+    box-shadow: 0 0 8px var(--cyan);
+}
+
+/* COMPONENT NAME DISPLAY */
+.component-name {
+    position: absolute;
+    top: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-display);
+    font-size: 0.7rem;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--cyan);
+    text-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+.component-name.visible {
+    opacity: 1;
+}
+
+/* INSTRUCTION PANEL */
+.instruction-panel {
+    position: absolute;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-glass);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-glow);
+    border-left: 3px solid var(--cyan);
+    padding: 12px 20px;
+    max-width: 400px;
+    width: 88%;
+}
+
+#instruction-text {
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+/* ======================== */
+/* QUIZ PANEL               */
+/* ======================== */
+.quiz-panel {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--bg-panel);
+    border: 1px solid var(--border-glow);
+    padding: 24px 20px;
+    max-width: 380px;
+    width: 88%;
+    animation: panel-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.quiz-panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 2px;
+    background: linear-gradient(90deg, var(--cyan), var(--magenta));
+}
+
+.quiz-panel::after {
+    content: 'DIAGNOSTIC';
+    position: absolute;
+    top: -10px; left: 16px;
+    font-family: var(--font-mono);
+    font-size: 0.55rem;
+    letter-spacing: 3px;
+    color: var(--cyan);
+    background: var(--bg-panel);
+    padding: 2px 8px;
+}
+
+@keyframes panel-enter {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -48%) scale(0.96);
     }
-];
-
-// Modele final affiche apres toutes les etapes
-const FINAL_MODEL = {
-    file: "assets/models/custom_gaming_pc.glb",
-    scale: "0.25 0.25 0.25",
-    position: "0 0.15 0",
-    rotation: "0 0 0"
-};
-
-// ========================
-// ETAT DU JEU
-// ========================
-let gameState = {
-    currentStep: 0,
-    score: 0,
-    quizPerfect: 0,
-    totalErrors: 0,
-    startTime: null,
-    markerFound: false,
-    phase: 'welcome',  // welcome | quiz | transition | complete
-    musicPlaying: false,
-    currentModelEntity: null
-};
-
-const POINTS_QUIZ_PERFECT = 100;
-const POINTS_QUIZ_RETRY   = 50;
-const PENALTY_WRONG        = -20;
-
-// Audio
-let bgMusic = null;
-let audioCtx = null;
-
-// ========================
-// INITIALISATION
-// ========================
-document.addEventListener('DOMContentLoaded', function () {
-    // Marker detection
-    var marker = document.querySelector('#main-marker');
-    if (marker) {
-        marker.addEventListener('markerFound', function () {
-            gameState.markerFound = true;
-            updateMarkerStatus(true);
-        });
-        marker.addEventListener('markerLost', function () {
-            gameState.markerFound = false;
-            updateMarkerStatus(false);
-        });
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
     }
+}
 
-    // Init background music element
-    bgMusic = document.getElementById('bg-music');
-    if (bgMusic) {
-        bgMusic.volume = 0.25;
-        bgMusic.loop = true;
-    }
-});
+.quiz-panel h3 {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    color: #fff;
+    margin: 8px 0 18px;
+    line-height: 1.5;
+    font-weight: 600;
+}
+
+.quiz-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.quiz-option {
+    padding: 11px 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    position: relative;
+    padding-left: 36px;
+}
+
+.quiz-option::before {
+    content: attr(data-index);
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    width: 16px;
+    text-align: center;
+}
+
+.quiz-option:hover {
+    background: rgba(0, 240, 255, 0.06);
+    border-color: rgba(0, 240, 255, 0.3);
+    color: #fff;
+}
+
+.quiz-option.correct {
+    background: rgba(0, 255, 159, 0.1);
+    border-color: var(--green);
+    color: var(--green);
+}
+
+.quiz-option.wrong {
+    background: rgba(255, 51, 51, 0.1);
+    border-color: var(--red);
+    color: var(--red);
+}
+
+.quiz-option.disabled {
+    pointer-events: none;
+    opacity: 0.4;
+}
+
+.quiz-feedback {
+    margin-top: 14px;
+    padding: 10px 12px;
+    font-family: var(--font-body);
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.5;
+    border-left: 3px solid transparent;
+}
+
+.quiz-feedback.correct {
+    background: rgba(0, 255, 159, 0.08);
+    border-left-color: var(--green);
+    color: var(--green);
+}
+
+.quiz-feedback.wrong {
+    background: rgba(255, 51, 51, 0.08);
+    border-left-color: var(--red);
+    color: var(--red);
+}
+
+/* ======================== */
+/* ACTION BUTTON            */
+/* ======================== */
+.hud-bottom {
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.btn-action {
+    padding: 12px 32px;
+    background: transparent;
+    color: var(--green);
+    font-family: var(--font-display);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border: 1px solid var(--green);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    animation: btn-glow 2s ease-in-out infinite;
+}
+
+@keyframes btn-glow {
+    0%, 100% { box-shadow: 0 0 15px rgba(0, 255, 159, 0.2); }
+    50% { box-shadow: 0 0 25px rgba(0, 255, 159, 0.4); }
+}
+
+.btn-action:hover {
+    background: rgba(0, 255, 159, 0.1);
+}
