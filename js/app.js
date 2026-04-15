@@ -1,29 +1,10 @@
-AFRAME.registerComponent('auto-scale', {
-    schema: { type: 'number', default: 0.5 },
-    init: function () {
-        var el = this.el;
-        var targetSize = this.data;
-        el.addEventListener('model-loaded', function () {
-            var mesh = el.getObject3D('mesh');
-            if (!mesh) return;
-            var bbox = new THREE.Box3().setFromObject(mesh);
-            var size = bbox.getSize(new THREE.Vector3());
-            var maxDim = Math.max(size.x, size.y, size.z);
-            if (maxDim > 0) {
-                var s = targetSize / maxDim;
-                el.setAttribute('scale', s + ' ' + s + ' ' + s);
-            }
-        });
-    }
-});
-
 const STEPS = [
     {
         id: 1,
         name: "Alimentation (PSU)",
         modelFile: "assets/models/psu_power_supply_unit.glb",
-        targetSize: 0.4,
-        modelPosition: "0 0.2 0",
+        modelScale: "0.1 0.1 0.1",
+        modelPosition: "0 0.25 0",
         modelRotation: "0 0 0",
         quiz: {
             question: "Quel composant fournit l'energie electrique a tout le PC ?",
@@ -41,7 +22,7 @@ const STEPS = [
         id: 2,
         name: "Carte Mere",
         modelFile: "assets/models/asus_strix_b-550-f_gaming_motherboard_realistic.glb",
-        targetSize: 0.5,
+        modelScale: "0.1 0.1 0.1",
         modelPosition: "0 0.2 0",
         modelRotation: "0 0 0",
         quiz: {
@@ -60,7 +41,7 @@ const STEPS = [
         id: 3,
         name: "Processeur (CPU)",
         modelFile: "assets/models/intel_cpu.glb",
-        targetSize: 0.3,
+        modelScale: "0.3 0.3 0.3",
         modelPosition: "0 0.2 0",
         modelRotation: "0 0 0",
         quiz: {
@@ -79,8 +60,8 @@ const STEPS = [
         id: 4,
         name: "Watercooling CPU",
         modelFile: "assets/models/corsair_h150i_elitie_cpu_liquid_cooler.glb",
-        targetSize: 0.4,
-        modelPosition: "0 0.2 0",
+        modelScale: "0.3 0.3 0.3",
+        modelPosition: "0 0.25 0",
         modelRotation: "0 0 0",
         quiz: {
             question: "Pourquoi installe-t-on un systeme de refroidissement sur le CPU ?",
@@ -98,7 +79,7 @@ const STEPS = [
         id: 5,
         name: "Memoire RAM",
         modelFile: "assets/models/ram_corsair_vengeance_ddr4_rgb_pro.glb",
-        targetSize: 0.3,
+        modelScale: "3 3 3",
         modelPosition: "0 0.2 0",
         modelRotation: "0 0 0",
         quiz: {
@@ -117,7 +98,7 @@ const STEPS = [
         id: 6,
         name: "Carte Graphique (GPU)",
         modelFile: "assets/models/asus_rog_geforce_rtx_4090_v2_0.glb",
-        targetSize: 0.45,
+        modelScale: "0.3 0.3 0.3",
         modelPosition: "0 0.2 0",
         modelRotation: "0 0 0",
         quiz: {
@@ -136,7 +117,7 @@ const STEPS = [
         id: 7,
         name: "Stockage SSD NVMe",
         modelFile: "assets/models/m_2_nvme_ssd_samsung_990_pro_1tb_3d_model.glb",
-        targetSize: 0.3,
+        modelScale: "1 1 1",
         modelPosition: "0 0.2 0",
         modelRotation: "0 0 0",
         quiz: {
@@ -155,7 +136,7 @@ const STEPS = [
 
 const FINAL_MODEL = {
     file: "assets/models/custom_gaming_pc.glb",
-    targetSize: 0.5,
+    scale: "0.005 0.005 0.005",
     position: "0 0.15 0",
     rotation: "0 0 0"
 };
@@ -173,8 +154,8 @@ let gameState = {
 };
 
 const POINTS_QUIZ_PERFECT = 100;
-const POINTS_QUIZ_RETRY   = 50;
-const PENALTY_WRONG        = -20;
+const POINTS_QUIZ_RETRY = 50;
+const PENALTY_WRONG = -20;
 
 let bgMusic = null;
 let audioCtx = null;
@@ -283,6 +264,7 @@ function sfxComplete() {
 function startExperience() {
     document.getElementById('welcome-screen').classList.add('hidden');
     document.getElementById('hud').classList.remove('hidden');
+    document.getElementById('music-btn').classList.remove('hidden');
 
     addMarkerStatus();
     startMusic();
@@ -317,8 +299,6 @@ function startStep(stepIndex) {
 
     loadComponentModel(step);
     showQuiz(step.quiz);
-
-    document.getElementById('btn-action').classList.add('hidden');
 }
 
 function updateHUD(stepIndex) {
@@ -345,11 +325,17 @@ function loadComponentModel(step) {
     entity.setAttribute('position', step.modelPosition);
     entity.setAttribute('scale', '0 0 0');
     entity.setAttribute('rotation', step.modelRotation);
-    entity.setAttribute('auto-scale', step.targetSize);
 
     entity.addEventListener('model-loaded', function () {
-        console.log('Modele charge : ' + step.name);
         if (loader) loader.classList.remove('active');
+
+        entity.setAttribute('animation__scalein', {
+            property: 'scale',
+            from: '0 0 0',
+            to: step.modelScale,
+            dur: 800,
+            easing: 'easeOutBack'
+        });
 
         entity.setAttribute('animation__rotate', {
             property: 'rotation',
@@ -363,7 +349,7 @@ function loadComponentModel(step) {
 
     entity.addEventListener('model-error', function () {
         if (loader) loader.classList.remove('active');
-        console.warn('Erreur chargement modele:', step.modelSrc);
+        console.warn('Erreur chargement modele:', step.modelFile);
     });
 
     marker.appendChild(entity);
@@ -403,10 +389,17 @@ function showFinalModel() {
     entity.setAttribute('position', FINAL_MODEL.position);
     entity.setAttribute('scale', '0 0 0');
     entity.setAttribute('rotation', FINAL_MODEL.rotation);
-    entity.setAttribute('auto-scale', FINAL_MODEL.targetSize);
 
     entity.addEventListener('model-loaded', function () {
         if (loader) loader.classList.remove('active');
+
+        entity.setAttribute('animation__scalein', {
+            property: 'scale',
+            from: '0 0 0',
+            to: FINAL_MODEL.scale,
+            dur: 2000,
+            easing: 'easeOutElastic'
+        });
 
         entity.setAttribute('animation__rotate', {
             property: 'rotation',
