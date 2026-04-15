@@ -1,843 +1,178 @@
-/* ============================================================ */
-/*  PC Builder AR — ImmaTech · Cyberpunk UI                     */
-/*  Auteurs : Mounir, Matteo, Marwan                            */
-/* ============================================================ */
-
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap');
-
-:root {
-    --cyan: #00f0ff;
-    --cyan-dim: #007a82;
-    --magenta: #ff2a6d;
-    --magenta-dim: #8a1538;
-    --yellow: #ffd700;
-    --green: #00ff9f;
-    --red: #ff3333;
-    --bg-void: #05050a;
-    --bg-panel: rgba(8, 8, 20, 0.92);
-    --bg-glass: rgba(8, 8, 20, 0.78);
-    --border-glow: rgba(0, 240, 255, 0.25);
-    --text-primary: #e8e8f0;
-    --text-dim: #6a6a80;
-    --font-display: 'Orbitron', monospace;
-    --font-body: 'Rajdhani', sans-serif;
-    --font-mono: 'Share Tech Mono', monospace;
-    --radius: 4px;
-    --glow-cyan: 0 0 20px rgba(0, 240, 255, 0.3), 0 0 60px rgba(0, 240, 255, 0.1);
-    --glow-magenta: 0 0 20px rgba(255, 42, 109, 0.3), 0 0 60px rgba(255, 42, 109, 0.1);
-}
-
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
-body {
-    font-family: var(--font-body);
-    overflow: hidden;
-    background: var(--bg-void);
-    color: var(--text-primary);
-    -webkit-font-smoothing: antialiased;
-}
-
-.hidden { display: none !important; }
-
-/* ======================== */
-/* SCANLINES OVERLAY        */
-/* ======================== */
-.scanlines {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    pointer-events: none;
-    z-index: 99999;
-    background: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        rgba(0, 0, 0, 0.08) 2px,
-        rgba(0, 0, 0, 0.08) 4px
-    );
-    mix-blend-mode: multiply;
-}
-
-/* ======================== */
-/* GRID BACKGROUND          */
-/* ======================== */
-.cyber-grid {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    pointer-events: none;
-    z-index: -1;
-    background-image:
-        linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-}
-
-/* ======================== */
-/* GLITCH TEXT EFFECT       */
-/* ======================== */
-@keyframes glitch-shift {
-    0%, 100% { text-shadow: 2px 0 var(--magenta), -2px 0 var(--cyan); }
-    25% { text-shadow: -2px -1px var(--magenta), 2px 1px var(--cyan); }
-    50% { text-shadow: 1px 2px var(--magenta), -1px -2px var(--cyan); }
-    75% { text-shadow: -1px 1px var(--magenta), 1px -1px var(--cyan); }
-}
-
-@keyframes glitch-flicker {
-    0%, 100% { opacity: 1; }
-    92% { opacity: 1; }
-    93% { opacity: 0.7; }
-    94% { opacity: 1; }
-    96% { opacity: 0.8; }
-    97% { opacity: 1; }
-}
-
-.glitch-text {
-    animation: glitch-shift 4s ease-in-out infinite, glitch-flicker 6s linear infinite;
-}
-
-/* ======================== */
-/* OVERLAY SCREENS          */
-/* ======================== */
-.overlay {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--bg-void);
-}
-
-.overlay::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background:
-        radial-gradient(ellipse at 20% 30%, rgba(0, 240, 255, 0.06) 0%, transparent 50%),
-        radial-gradient(ellipse at 80% 70%, rgba(255, 42, 109, 0.04) 0%, transparent 50%),
-        radial-gradient(ellipse at 50% 50%, rgba(0, 240, 255, 0.02) 0%, transparent 70%);
-    pointer-events: none;
-}
-
-/* ======================== */
-/* WELCOME SCREEN           */
-/* ======================== */
-.welcome-container, .end-container {
-    text-align: center;
-    padding: 2.5rem 2rem;
-    max-width: 440px;
-    width: 92%;
-    position: relative;
-    z-index: 1;
-}
-
-.logo-icon {
-    width: 64px;
-    height: 64px;
-    margin: 0 auto 1.2rem;
-    border: 2px solid var(--cyan);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    animation: logo-pulse 3s ease-in-out infinite;
-}
-
-.logo-icon::before {
-    content: '';
-    position: absolute;
-    inset: -4px;
-    border: 1px solid rgba(0, 240, 255, 0.2);
-}
-
-.logo-icon svg {
-    width: 32px;
-    height: 32px;
-    fill: var(--cyan);
-}
-
-@keyframes logo-pulse {
-    0%, 100% { box-shadow: var(--glow-cyan); }
-    50% { box-shadow: 0 0 30px rgba(0, 240, 255, 0.5), 0 0 80px rgba(0, 240, 255, 0.15); }
-}
-
-.welcome-container h1, .end-container h1 {
-    font-family: var(--font-display);
-    font-size: 1.8rem;
-    font-weight: 900;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    margin-bottom: 0.2rem;
-    color: #fff;
-}
-
-.highlight-cyan { color: var(--cyan); }
-.highlight-magenta { color: var(--magenta); }
-
-.subtitle {
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    color: var(--magenta);
-    text-transform: uppercase;
-    letter-spacing: 6px;
-    font-weight: 400;
-    margin-bottom: 1.8rem;
-    opacity: 0.9;
-}
-
-.separator {
-    width: 60px;
-    height: 1px;
-    margin: 0 auto 1.5rem;
-    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
-}
-
-.description {
-    font-size: 0.95rem;
-    color: var(--text-dim);
-    line-height: 1.7;
-    margin-bottom: 1.5rem;
-    font-weight: 400;
-}
-
-.team-info {
-    font-family: var(--font-mono);
-    font-size: 0.7rem;
-    color: var(--text-dim);
-    margin-bottom: 2rem;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-}
-.team-info span {
-    color: var(--cyan);
-    font-weight: 400;
-}
-
-/* PRIMARY BUTTON */
-.btn-primary {
-    display: inline-block;
-    padding: 14px 48px;
-    background: transparent;
-    color: var(--cyan);
-    font-family: var(--font-display);
-    font-size: 0.85rem;
-    font-weight: 700;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    border: 1px solid var(--cyan);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.btn-primary::before {
-    content: '';
-    position: absolute;
-    top: 0; left: -100%;
-    width: 100%; height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.15), transparent);
-    transition: left 0.5s ease;
-}
-
-.btn-primary:hover {
-    background: rgba(0, 240, 255, 0.08);
-    box-shadow: var(--glow-cyan);
-}
-
-.btn-primary:hover::before {
-    left: 100%;
-}
-
-.btn-primary:active {
-    background: rgba(0, 240, 255, 0.15);
-}
-
-.hint {
-    margin-top: 1.5rem;
-    font-family: var(--font-mono);
-    font-size: 0.65rem;
-    color: var(--text-dim);
-    letter-spacing: 1px;
-    opacity: 0.6;
-}
-
-/* ======================== */
-/* HUD                      */
-/* ======================== */
-.hud {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: 100;
-    pointer-events: none;
-}
-.hud > * { pointer-events: auto; }
-
-.hud-top {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%;
-    padding: 14px 16px 20px;
-    background: linear-gradient(to bottom, rgba(5, 5, 10, 0.85) 0%, rgba(5, 5, 10, 0.4) 70%, transparent 100%);
-}
-
-.progress-container {
-    max-width: 500px;
-    margin: 0 auto;
-}
-
-.progress-label {
-    display: flex;
-    justify-content: space-between;
-    font-family: var(--font-mono);
-    font-size: 0.65rem;
-    font-weight: 400;
-    margin-bottom: 8px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-}
-
-#step-label { color: var(--cyan); }
-#score-label { color: var(--yellow); }
-
-.progress-bar {
-    width: 100%;
-    height: 3px;
-    background: rgba(255, 255, 255, 0.08);
-    overflow: hidden;
-    position: relative;
-}
-
-.progress-fill {
-    height: 100%;
-    background: var(--cyan);
-    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    box-shadow: 0 0 10px var(--cyan);
-}
-
-.progress-fill::after {
-    content: '';
-    position: absolute;
-    right: 0; top: -2px;
-    width: 2px; height: 7px;
-    background: var(--cyan);
-    box-shadow: 0 0 8px var(--cyan);
-}
-
-/* COMPONENT NAME DISPLAY */
-.component-name {
-    position: absolute;
-    top: 70px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-family: var(--font-display);
-    font-size: 0.7rem;
-    letter-spacing: 4px;
-    text-transform: uppercase;
-    color: var(--cyan);
-    text-shadow: 0 0 20px rgba(0, 240, 255, 0.5);
-    opacity: 0;
-    transition: opacity 0.5s ease;
-    pointer-events: none;
-    white-space: nowrap;
-}
-
-.component-name.visible {
-    opacity: 1;
-}
-
-/* INSTRUCTION PANEL */
-.instruction-panel {
-    position: absolute;
-    bottom: 90px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--bg-glass);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid var(--border-glow);
-    border-left: 3px solid var(--cyan);
-    padding: 12px 20px;
-    max-width: 400px;
-    width: 88%;
-}
-
-#instruction-text {
-    font-family: var(--font-body);
-    font-size: 0.9rem;
-    line-height: 1.5;
-    color: var(--text-primary);
-    font-weight: 500;
-}
-
-/* ======================== */
-/* QUIZ PANEL               */
-/* ======================== */
-.quiz-panel {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: var(--bg-panel);
-    border: 1px solid var(--border-glow);
-    padding: 24px 20px;
-    max-width: 380px;
-    width: 88%;
-    animation: panel-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.quiz-panel::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 2px;
-    background: linear-gradient(90deg, var(--cyan), var(--magenta));
-}
-
-.quiz-panel::after {
-    content: 'DIAGNOSTIC';
-    position: absolute;
-    top: -10px; left: 16px;
-    font-family: var(--font-mono);
-    font-size: 0.55rem;
-    letter-spacing: 3px;
-    color: var(--cyan);
-    background: var(--bg-panel);
-    padding: 2px 8px;
-}
-
-@keyframes panel-enter {
-    from {
-        opacity: 0;
-        transform: translate(-50%, -48%) scale(0.96);
-    }
-    to {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1);
-    }
-}
-
-.quiz-panel h3 {
-    font-family: var(--font-body);
-    font-size: 1rem;
-    color: #fff;
-    margin: 8px 0 18px;
-    line-height: 1.5;
-    font-weight: 600;
-}
-
-.quiz-options {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.quiz-option {
-    padding: 11px 14px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    color: var(--text-primary);
-    font-family: var(--font-body);
-    font-size: 0.88rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-align: left;
-    position: relative;
-    padding-left: 36px;
-}
-
-.quiz-option::before {
-    content: attr(data-index);
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-family: var(--font-mono);
-    font-size: 0.65rem;
-    color: var(--text-dim);
-    width: 16px;
-    text-align: center;
-}
-
-.quiz-option:hover {
-    background: rgba(0, 240, 255, 0.06);
-    border-color: rgba(0, 240, 255, 0.3);
-    color: #fff;
-}
-
-.quiz-option.correct {
-    background: rgba(0, 255, 159, 0.1);
-    border-color: var(--green);
-    color: var(--green);
-}
-
-.quiz-option.wrong {
-    background: rgba(255, 51, 51, 0.1);
-    border-color: var(--red);
-    color: var(--red);
-}
-
-.quiz-option.disabled {
-    pointer-events: none;
-    opacity: 0.4;
-}
-
-.quiz-feedback {
-    margin-top: 14px;
-    padding: 10px 12px;
-    font-family: var(--font-body);
-    font-size: 0.82rem;
-    font-weight: 600;
-    line-height: 1.5;
-    border-left: 3px solid transparent;
-}
-
-.quiz-feedback.correct {
-    background: rgba(0, 255, 159, 0.08);
-    border-left-color: var(--green);
-    color: var(--green);
-}
-
-.quiz-feedback.wrong {
-    background: rgba(255, 51, 51, 0.08);
-    border-left-color: var(--red);
-    color: var(--red);
-}
-
-/* ======================== */
-/* ACTION BUTTON            */
-/* ======================== */
-.hud-bottom {
-    position: absolute;
-    bottom: 24px;
-    left: 50%;
-    transform: translateX(-50%);
-}
-
-.btn-action {
-    padding: 12px 32px;
-    background: transparent;
-    color: var(--green);
-    font-family: var(--font-display);
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    border: 1px solid var(--green);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    animation: btn-glow 2s ease-in-out infinite;
-}
-
-@keyframes btn-glow {
-    0%, 100% { box-shadow: 0 0 15px rgba(0, 255, 159, 0.2); }
-    50% { box-shadow: 0 0 25px rgba(0, 255, 159, 0.4); }
-}
-
-.btn-action:hover {
-    background: rgba(0, 255, 159, 0.1);
-}
-
-/* ======================== */
-/* END SCREEN               */
-/* ======================== */
-.end-container h1 {
-    margin-bottom: 0.5rem;
-}
-
-.rank-badge {
-    font-family: var(--font-display);
-    font-size: 3rem;
-    font-weight: 900;
-    margin-bottom: 0.3rem;
-    color: var(--yellow);
-    text-shadow: 0 0 30px rgba(255, 215, 0, 0.4);
-    letter-spacing: 2px;
-}
-
-.rank-badge.gold { color: var(--yellow); text-shadow: 0 0 30px rgba(255, 215, 0, 0.4); }
-.rank-badge.silver { color: #c0c0c0; text-shadow: 0 0 30px rgba(192, 192, 192, 0.4); }
-.rank-badge.bronze { color: #cd7f32; text-shadow: 0 0 30px rgba(205, 127, 50, 0.4); }
-.rank-badge.beginner { color: var(--text-dim); }
-
-.final-message {
-    color: var(--text-dim);
-    margin-bottom: 2rem;
-    font-size: 0.95rem;
-    font-weight: 500;
-}
-
-.score-recap {
-    display: flex;
-    justify-content: center;
-    gap: 16px;
-    margin-bottom: 1.5rem;
-}
-
-.score-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    padding: 16px 18px;
-    min-width: 85px;
-}
-
-.score-value {
-    font-family: var(--font-display);
-    font-size: 1.4rem;
-    font-weight: 800;
-    color: var(--cyan);
-}
-
-.score-desc {
-    font-family: var(--font-mono);
-    font-size: 0.6rem;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 2px;
-}
-
-.score-details {
-    margin-bottom: 2rem;
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    color: var(--text-dim);
-    line-height: 2.2;
-    letter-spacing: 0.5px;
-}
-
-.score-details .label-ok { color: var(--green); }
-.score-details .label-err { color: var(--red); }
-
-/* ======================== */
-/* MARKER STATUS            */
-/* ======================== */
-#marker-status {
-    position: fixed;
-    bottom: 150px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(255, 51, 51, 0.15);
-    border: 1px solid rgba(255, 51, 51, 0.4);
-    color: var(--red);
-    padding: 8px 20px;
-    font-family: var(--font-mono);
-    font-size: 0.65rem;
-    font-weight: 400;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    z-index: 200;
-    transition: all 0.3s ease;
-}
-
-#marker-status.found {
-    background: rgba(0, 255, 159, 0.1);
-    border-color: rgba(0, 255, 159, 0.3);
-    color: var(--green);
-}
-
-/* ======================== */
-/* PARTICLE SYSTEM          */
-/* ======================== */
-.particles-container {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    pointer-events: none;
-    z-index: 9998;
-    overflow: hidden;
-}
-
-.particle {
-    position: absolute;
-    width: 3px;
-    height: 3px;
-    pointer-events: none;
-}
-
-@keyframes particle-fly {
-    0% {
-        transform: translate(0, 0) scale(1);
-        opacity: 1;
-    }
-    100% {
-        transform: translate(var(--dx), var(--dy)) scale(0);
-        opacity: 0;
-    }
-}
-
-/* ======================== */
-/* SCREEN FLASH             */
-/* ======================== */
-.flash-overlay {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    pointer-events: none;
-    z-index: 9997;
-    opacity: 0;
-    transition: opacity 0.1s ease;
-}
-
-.flash-overlay.flash-correct {
-    background: radial-gradient(ellipse at center, rgba(0, 255, 159, 0.15), transparent 70%);
-    animation: flash 0.5s ease-out;
-}
-
-.flash-overlay.flash-wrong {
-    background: radial-gradient(ellipse at center, rgba(255, 51, 51, 0.15), transparent 70%);
-    animation: flash 0.3s ease-out;
-}
-
-.flash-overlay.flash-complete {
-    background: radial-gradient(ellipse at center, rgba(0, 240, 255, 0.2), rgba(255, 42, 109, 0.1), transparent 70%);
-    animation: flash 1s ease-out;
-}
-
-@keyframes flash {
-    0% { opacity: 1; }
-    100% { opacity: 0; }
-}
-
-/* ======================== */
-/* GLITCH SCREEN EFFECT     */
-/* ======================== */
-@keyframes glitch-screen {
-    0% { transform: translate(0); }
-    20% { transform: translate(-3px, 2px); }
-    40% { transform: translate(3px, -1px); }
-    60% { transform: translate(-1px, 3px); }
-    80% { transform: translate(2px, -2px); }
-    100% { transform: translate(0); }
-}
-
-.glitch-active {
-    animation: glitch-screen 0.15s ease-in-out 2;
-}
-
-/* ======================== */
-/* SCORE POPUP              */
-/* ======================== */
-.score-popup {
-    position: fixed;
-    top: 40%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-family: var(--font-display);
-    font-size: 2rem;
-    font-weight: 900;
-    letter-spacing: 2px;
-    pointer-events: none;
-    z-index: 9998;
-    animation: score-fly 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.score-popup.positive {
-    color: var(--green);
-    text-shadow: 0 0 30px rgba(0, 255, 159, 0.6);
-}
-
-.score-popup.negative {
-    color: var(--red);
-    text-shadow: 0 0 30px rgba(255, 51, 51, 0.6);
-}
-
-@keyframes score-fly {
-    0% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(0.5);
-    }
-    30% {
-        transform: translate(-50%, -50%) scale(1.2);
-    }
-    100% {
-        opacity: 0;
-        transform: translate(-50%, -120%) scale(0.8);
-    }
-}
-
-/* ======================== */
-/* MUSIC TOGGLE             */
-/* ======================== */
-.music-toggle {
-    position: fixed;
-    top: 14px;
-    right: 14px;
-    z-index: 9999;
-    width: 36px;
-    height: 36px;
-    background: var(--bg-panel);
-    border: 1px solid var(--border-glow);
-    color: var(--cyan);
-    font-size: 0.8rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-}
-
-.music-toggle:hover {
-    background: rgba(0, 240, 255, 0.1);
-}
-
-.music-toggle.muted {
-    color: var(--text-dim);
-    border-color: rgba(255, 255, 255, 0.08);
-}
-
-/* ======================== */
-/* LOADING INDICATOR        */
-/* ======================== */
-.loading-model {
-    position: absolute;
-    bottom: 155px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-family: var(--font-mono);
-    font-size: 0.6rem;
-    color: var(--cyan);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.loading-model.active {
-    opacity: 1;
-    animation: loading-blink 1s ease-in-out infinite;
-}
-
-@keyframes loading-blink {
-    0%, 100% { opacity: 0.4; }
-    50% { opacity: 1; }
-}
-
-/* ======================== */
-/* RESPONSIVE               */
-/* ======================== */
-@media (max-width: 400px) {
-    .welcome-container h1, .end-container h1 {
-        font-size: 1.4rem;
-        letter-spacing: 2px;
-    }
-    .quiz-panel {
-        width: 94%;
-        padding: 20px 16px;
-    }
-    .score-recap { gap: 8px; }
-    .score-item {
-        padding: 12px 12px;
-        min-width: 70px;
-    }
-    .score-value { font-size: 1.2rem; }
-}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PC Builder AR — ImmaTech</title>
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.7/aframe/build/aframe-ar.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body style="margin: 0; overflow: hidden;">
+
+    <!-- Scanlines overlay -->
+    <div class="scanlines"></div>
+    <div class="cyber-grid"></div>
+
+    <!-- Particles container -->
+    <div id="particles-container" class="particles-container"></div>
+
+    <!-- Flash overlay -->
+    <div id="flash-overlay" class="flash-overlay"></div>
+
+    <!-- Music toggle -->
+    <button id="music-btn" class="music-toggle muted hidden" onclick="toggleMusic()">//</button>
+
+    <!-- Background music -->
+    <audio id="bg-music" preload="auto" loop>
+        <source src="assets/audio/bgm.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- ======================== -->
+    <!-- ECRAN D'ACCUEIL          -->
+    <!-- ======================== -->
+    <div id="welcome-screen" class="overlay">
+        <div class="welcome-container">
+
+            <!-- Logo icon (SVG circuit) -->
+            <div class="logo-icon">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 2v4H5v4H2v4h3v4h4v4h6v-4h4v-4h3v-4h-3V6h-4V2H9zm0 2h6v4h4v4h-4v4H9v-4H5V8h4V4z"/>
+                </svg>
+            </div>
+
+            <h1 class="glitch-text">PC <span class="highlight-cyan">BUILDER</span> AR</h1>
+            <p class="subtitle">IMMATECH // FORMATION</p>
+
+            <div class="separator"></div>
+
+            <p class="description">
+                Assemblez un PC etape par etape en realite augmentee.
+                Identifiez chaque composant, repondez aux diagnostics,
+                et construisez votre machine.
+            </p>
+
+            <div class="team-info">
+                <span>MOUNIR</span> // <span>MATTEO</span> // <span>MARWAN</span>
+            </div>
+
+            <button id="btn-start" class="btn-primary" onclick="startExperience()">
+                INITIALISER
+            </button>
+
+            <p class="hint">Imprimez ou affichez le marqueur HIRO sur un ecran</p>
+        </div>
+    </div>
+
+    <!-- ======================== -->
+    <!-- HUD                      -->
+    <!-- ======================== -->
+    <div id="hud" class="hud hidden">
+        <div class="hud-top">
+            <div class="progress-container">
+                <div class="progress-label">
+                    <span id="step-label">ETAPE 1/7</span>
+                    <span id="score-label">SCORE 0</span>
+                </div>
+                <div class="progress-bar">
+                    <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Component name display -->
+        <div id="component-name" class="component-name"></div>
+
+        <!-- Loading model indicator -->
+        <div id="loading-model" class="loading-model">CHARGEMENT MODELE 3D...</div>
+
+        <!-- Instruction panel -->
+        <div id="instruction-panel" class="instruction-panel">
+            <p id="instruction-text">Scannez le marqueur pour initialiser...</p>
+        </div>
+
+        <!-- Quiz panel -->
+        <div id="quiz-panel" class="quiz-panel hidden">
+            <h3 id="quiz-question">Question</h3>
+            <div id="quiz-options" class="quiz-options"></div>
+            <div id="quiz-feedback" class="quiz-feedback hidden"></div>
+        </div>
+
+        <div class="hud-bottom">
+            <button id="btn-action" class="btn-action hidden" onclick="handleAction()">
+                VALIDER
+            </button>
+        </div>
+    </div>
+
+    <!-- ======================== -->
+    <!-- ECRAN FINAL              -->
+    <!-- ======================== -->
+    <div id="end-screen" class="overlay hidden">
+        <div class="end-container">
+            <div id="rank-badge" class="rank-badge">S+</div>
+            <h1 class="glitch-text">ASSEMBLAGE <span class="highlight-cyan">COMPLET</span></h1>
+
+            <p id="final-message" class="final-message">Performance evaluee.</p>
+
+            <div class="score-recap">
+                <div class="score-item">
+                    <span class="score-value" id="final-score">0</span>
+                    <span class="score-desc">POINTS</span>
+                </div>
+                <div class="score-item">
+                    <span class="score-value" id="final-time">0:00</span>
+                    <span class="score-desc">TEMPS</span>
+                </div>
+                <div class="score-item">
+                    <span class="score-value" id="final-rank">S+</span>
+                    <span class="score-desc">RANG</span>
+                </div>
+            </div>
+
+            <div class="score-details">
+                <p><span class="label-ok">[OK]</span> Quiz reussis du premier coup : <span id="quiz-perfect">0</span>/7</p>
+                <p><span class="label-err">[ERR]</span> Erreurs totales : <span id="total-errors">0</span></p>
+            </div>
+
+            <button class="btn-primary" onclick="restartExperience()">
+                REINITIALISER
+            </button>
+        </div>
+    </div>
+
+    <!-- ======================== -->
+    <!-- SCENE A-FRAME AR         -->
+    <!-- ======================== -->
+    <a-scene
+        embedded
+        arjs="sourceType: webcam; debugUIEnabled: false;"
+        vr-mode-ui="enabled: false"
+        loading-screen="enabled: false"
+        renderer="logarithmicDepthBuffer: true; colorManagement: true;"
+    >
+        <!-- Eclairage -->
+        <a-light type="ambient" color="#ffffff" intensity="0.8"></a-light>
+        <a-light type="directional" color="#ffffff" intensity="0.7"
+                 position="1 3 2" castShadow="false"></a-light>
+        <a-light type="directional" color="#aaddff" intensity="0.3"
+                 position="-2 2 -1"></a-light>
+
+        <!-- Marqueur Hiro — les modeles 3D sont charges dynamiquement par JS -->
+        <a-marker preset="hiro" id="main-marker" emitevents="true">
+            <!-- Les entites gltf-model seront ajoutees/retirees par app.js -->
+        </a-marker>
+
+        <a-entity camera></a-entity>
+    </a-scene>
+
+    <script src="js/app.js"></script>
+    <script>
+        // Show music button once experience starts
+        document.getElementById('btn-start').addEventListener('click', function() {
+            document.getElementById('music-btn').classList.remove('hidden');
+        });
+    </script>
+
+</body>
+</html>
