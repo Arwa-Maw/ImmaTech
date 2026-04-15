@@ -3,7 +3,7 @@ const STEPS = [
         id: 1,
         name: "Alimentation (PSU)",
         modelFile: "assets/models/psu_power_supply_unit.glb",
-        modelScale: "0.1 0.1 0.1",
+        modelScale: "0.05 0.05 0.05",
         modelPosition: "0 0.25 0",
         modelRotation: "0 0 0",
         quiz: {
