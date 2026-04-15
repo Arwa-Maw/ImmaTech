@@ -22,8 +22,8 @@ const STEPS = [
         id: 2,
         name: "Carte Mere",
         modelFile: "assets/models/asus_strix_b-550-f_gaming_motherboard_realistic.glb",
-        modelScale: "0.1 0.1 0.1",
-        modelPosition: "0 0.2 0",
+        modelScale: "0.03 0.03 0.03",
+        modelPosition: "0 0 0",
         modelRotation: "0 0 0",
         quiz: {
             question: "Quel composant sert de circuit principal pour connecter tous les autres ?",
@@ -319,41 +319,58 @@ function loadComponentModel(step) {
     var loader = document.getElementById('loading-model');
     if (loader) loader.classList.add('active');
 
-    var entity = document.createElement('a-entity');
-    entity.setAttribute('id', 'current-component');
-    entity.setAttribute('gltf-model', 'url(' + step.modelFile + ')');
-    entity.setAttribute('position', step.modelPosition);
-    entity.setAttribute('scale', '0 0 0');
-    entity.setAttribute('rotation', step.modelRotation);
+    var wrapper = document.createElement('a-entity');
+    wrapper.setAttribute('id', 'current-component');
+    wrapper.setAttribute('position', step.modelPosition);
+    wrapper.setAttribute('scale', '0 0 0');
+    wrapper.setAttribute('rotation', step.modelRotation);
 
-    entity.addEventListener('model-loaded', function () {
+    var inner = document.createElement('a-entity');
+    inner.setAttribute('gltf-model', 'url(' + step.modelFile + ')');
+
+    inner.addEventListener('model-loaded', function () {
         if (loader) loader.classList.remove('active');
+        centerModel(inner);
 
-        entity.setAttribute('animation__scalein', {
+        wrapper.setAttribute('animation__scalein', {
             property: 'scale',
             from: '0 0 0',
             to: step.modelScale,
             dur: 800,
             easing: 'easeOutBack'
         });
-
-        entity.setAttribute('animation__rotate', {
-            property: 'rotation',
-            from: step.modelRotation,
-            to: rotateY360(step.modelRotation),
-            dur: 10000,
-            loop: true,
-            easing: 'linear'
-        });
     });
 
-    entity.addEventListener('model-error', function () {
+    inner.addEventListener('model-error', function () {
         if (loader) loader.classList.remove('active');
         console.warn('Erreur chargement modele:', step.modelFile);
     });
 
-    marker.appendChild(entity);
-    gameState.currentModelEntity = entity;
+    wrapper.appendChild(inner);
+    marker.appendChild(wrapper);
+    gameState.currentModelEntity = wrapper;
+}
+
+function centerModel(inner) {
+    var mesh = inner.getObject3D('mesh');
+    if (!mesh) return;
+    var wrapper = inner.parentNode && inner.parentNode.object3D;
+    var savedScale = null;
+    if (wrapper) {
+        savedScale = wrapper.scale.clone();
+        wrapper.scale.set(1, 1, 1);
+        wrapper.updateMatrixWorld(true);
+    }
+    var bbox = new THREE.Box3().setFromObject(mesh);
+    var center = bbox.getCenter(new THREE.Vector3());
+    var minY = bbox.min.y;
+    if (wrapper && savedScale) {
+        wrapper.scale.copy(savedScale);
+        wrapper.updateMatrixWorld(true);
+    }
+    // Center X/Z on the marker, sit the model's base on the marker plane (Y).
+    inner.setAttribute('position',
+        (-center.x) + ' ' + (-minY) + ' ' + (-center.z));
 }
 
 function rotateY360(baseRotation) {
@@ -383,41 +400,36 @@ function showFinalModel() {
         loader.classList.add('active');
     }
 
-    var entity = document.createElement('a-entity');
-    entity.setAttribute('id', 'final-pc-model');
-    entity.setAttribute('gltf-model', 'url(' + FINAL_MODEL.file + ')');
-    entity.setAttribute('position', FINAL_MODEL.position);
-    entity.setAttribute('scale', '0 0 0');
-    entity.setAttribute('rotation', FINAL_MODEL.rotation);
+    var wrapper = document.createElement('a-entity');
+    wrapper.setAttribute('id', 'final-pc-model');
+    wrapper.setAttribute('position', FINAL_MODEL.position);
+    wrapper.setAttribute('scale', '0 0 0');
+    wrapper.setAttribute('rotation', FINAL_MODEL.rotation);
 
-    entity.addEventListener('model-loaded', function () {
+    var inner = document.createElement('a-entity');
+    inner.setAttribute('gltf-model', 'url(' + FINAL_MODEL.file + ')');
+
+    inner.addEventListener('model-loaded', function () {
         if (loader) loader.classList.remove('active');
+        centerModel(inner);
 
-        entity.setAttribute('animation__scalein', {
+        wrapper.setAttribute('animation__scalein', {
             property: 'scale',
             from: '0 0 0',
             to: FINAL_MODEL.scale,
             dur: 2000,
             easing: 'easeOutElastic'
         });
-
-        entity.setAttribute('animation__rotate', {
-            property: 'rotation',
-            from: FINAL_MODEL.rotation,
-            to: rotateY360(FINAL_MODEL.rotation),
-            dur: 12000,
-            loop: true,
-            easing: 'linear'
-        });
     });
 
-    entity.addEventListener('model-error', function () {
+    inner.addEventListener('model-error', function () {
         if (loader) loader.classList.remove('active');
         console.warn('Erreur chargement modele final');
     });
 
-    marker.appendChild(entity);
-    gameState.currentModelEntity = entity;
+    wrapper.appendChild(inner);
+    marker.appendChild(wrapper);
+    gameState.currentModelEntity = wrapper;
 }
 
 function showQuiz(quiz) {
