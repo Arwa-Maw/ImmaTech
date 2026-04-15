@@ -24,7 +24,7 @@ const STEPS = [
         modelFile: "assets/models/asus_strix_b-550-f_gaming_motherboard_realistic.glb",
         modelScale: "0.03 0.03 0.03",
         modelPosition: "0 0 0",
-        modelRotation: "0 0 0",
+        modelRotation: "-90 0 0",
         quiz: {
             question: "Quel composant sert de circuit principal pour connecter tous les autres ?",
             options: [
