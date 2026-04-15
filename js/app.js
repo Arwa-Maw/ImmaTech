@@ -404,31 +404,143 @@ function showFinalModel() {
     gameState.currentModelEntity = entity;
 }
 
+
 // ========================
-// STUBS — effets et fin de jeu (a venir)
+// MUSIQUE
 // ========================
-function sfxCorrect() {}
-function sfxWrong() {}
-function sfxComplete() {}
-function triggerFlash(type) {}
-function triggerParticles(count, color) {}
-function triggerGlitch() {}
-function showScorePopup(text, positive) {}
-function toggleMusic() {}
-function startMusic() {}
-function addMarkerStatus() {
-    var s = document.createElement('div'); s.id = 'marker-status';
-    s.textContent = 'RECHERCHE MARQUEUR HIRO...'; document.body.appendChild(s);
+function toggleMusic() {
+    var btn = document.getElementById('music-btn');
+    if (!bgMusic) return;
+    if (gameState.musicPlaying) {
+        bgMusic.pause(); gameState.musicPlaying = false;
+        btn.classList.add('muted'); btn.textContent = '//';
+    } else {
+        bgMusic.play().catch(function () { });
+        gameState.musicPlaying = true; btn.classList.remove('muted'); btn.textContent = '\u266A';
+    }
 }
+
+function startMusic() {
+    if (!bgMusic || gameState.musicPlaying) return;
+    bgMusic.play().then(function () {
+        gameState.musicPlaying = true;
+        var btn = document.getElementById('music-btn');
+        if (btn) btn.textContent = '\u266A';
+    }).catch(function () { });
+}
+
+// ========================
+// EFFETS SONORES (Web Audio API)
+// ========================
+function initAudioCtx() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+function playBeep(freq, duration, type) {
+    initAudioCtx();
+    if (!audioCtx) return;
+    var osc = audioCtx.createOscillator();
+    var gain = audioCtx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.start(); osc.stop(audioCtx.currentTime + duration);
+}
+
+function sfxCorrect() {
+    playBeep(880, 0.15, 'square');
+    setTimeout(function () { playBeep(1100, 0.15, 'square'); }, 100);
+    setTimeout(function () { playBeep(1320, 0.25, 'square'); }, 200);
+}
+
+function sfxWrong() {
+    playBeep(200, 0.3, 'sawtooth');
+    setTimeout(function () { playBeep(150, 0.4, 'sawtooth'); }, 150);
+}
+
+function sfxComplete() {
+    var notes = [523, 659, 784, 1047, 1319];
+    notes.forEach(function (f, i) {
+        setTimeout(function () { playBeep(f, 0.3, 'square'); }, i * 120);
+    });
+}
+
+// ========================
+// EFFETS VISUELS
+// ========================
+function triggerFlash(type) {
+    var flash = document.getElementById('flash-overlay');
+    if (!flash) return;
+    flash.className = 'flash-overlay flash-' + type;
+    setTimeout(function () { flash.className = 'flash-overlay'; },
+        type === 'complete' ? 1000 : 500);
+}
+
+function triggerParticles(count, color) {
+    var container = document.getElementById('particles-container');
+    if (!container) return;
+    for (var i = 0; i < count; i++) {
+        var p = document.createElement('div');
+        p.className = 'particle'; p.style.background = color;
+        p.style.left = '50%'; p.style.top = '50%';
+        p.style.boxShadow = '0 0 6px ' + color;
+        var angle = (Math.PI * 2 * i) / count + (Math.random() * 0.5);
+        var distance = 80 + Math.random() * 200;
+        p.style.setProperty('--dx', Math.cos(angle) * distance + 'px');
+        p.style.setProperty('--dy', Math.sin(angle) * distance + 'px');
+        p.style.animation = 'particle-fly ' + (0.6 + Math.random() * 0.8) + 's ease-out forwards';
+        container.appendChild(p);
+        (function (el) { setTimeout(function () {
+            if (el.parentNode) el.parentNode.removeChild(el);
+        }, 1500); })(p);
+    }
+}
+
+function triggerGlitch() {
+    document.body.classList.add('glitch-active');
+    setTimeout(function () { document.body.classList.remove('glitch-active'); }, 300);
+}
+
+function showScorePopup(text, positive) {
+    var popup = document.createElement('div');
+    popup.className = 'score-popup ' + (positive ? 'positive' : 'negative');
+    popup.textContent = text;
+    document.body.appendChild(popup);
+    setTimeout(function () { if (popup.parentNode) popup.parentNode.removeChild(popup); }, 1300);
+}
+
+// ========================
+// MARKER STATUS
+// ========================
+function addMarkerStatus() {
+    var s = document.createElement('div');
+    s.id = 'marker-status';
+    s.textContent = 'RECHERCHE MARQUEUR HIRO...';
+    document.body.appendChild(s);
+}
+
 function updateMarkerStatus(found) {
     var s = document.getElementById('marker-status');
     if (!s) return;
-    if (found) { s.textContent = 'MARQUEUR DETECTE'; s.classList.add('found');
-        setTimeout(function(){ s.style.opacity='0'; }, 2000);
-    } else { s.textContent = 'RECHERCHE MARQUEUR HIRO...'; s.classList.remove('found'); s.style.opacity='1'; }
+    if (found) {
+        s.textContent = 'MARQUEUR DETECTE'; s.classList.add('found');
+        setTimeout(function () { s.style.opacity = '0'; }, 2000);
+    } else {
+        s.textContent = 'RECHERCHE MARQUEUR HIRO...';
+        s.classList.remove('found'); s.style.opacity = '1';
+    }
 }
+
+// ========================
+// STUBS — fin de jeu (a venir au prochain commit)
+// ========================
 function finishGame() {
-    document.getElementById('instruction-text').textContent = 'Assemblage termine !';
+    gameState.phase = 'complete';
+    sfxComplete(); triggerFlash('complete'); triggerParticles(50, 'var(--cyan)');
+    document.getElementById('instruction-text').textContent = 'PC assemble ! Fin du jeu a implementer.';
     showFinalModel();
 }
+
 function restartExperience() { location.reload(); }
