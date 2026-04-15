@@ -34,7 +34,7 @@ const STEPS = [
         id: 2,
         name: "Carte Mere",
         modelFile: "assets/models/asus_strix_b-550-f_gaming_motherboard_realistic.glb",
-        modelScale: "0.1 0.1 0.1",
+        modelScale: "0.3 0.3 0.3",
         modelPosition: "0 0.2 0",
         modelRotation: "-90 0 0",
         quiz: {
