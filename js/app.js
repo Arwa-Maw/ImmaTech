@@ -3,7 +3,7 @@ const STEPS = [
         id: 1,
         name: "Alimentation (PSU)",
         modelFile: "assets/models/psu_power_supply_unit.glb",
-        modelScale: "0.1 0.1 0.1",
+        modelScale: "0.05 0.05 0.05",
         modelPosition: "0 0.25 0",
         modelRotation: "0 0 0",
         quiz: {
@@ -117,7 +117,7 @@ const STEPS = [
         id: 7,
         name: "Stockage SSD NVMe",
         modelFile: "assets/models/m_2_nvme_ssd_samsung_990_pro_1tb_3d_model.glb",
-        modelScale: "1 1 1",
+        modelScale: "0.25 0.25 0.25",
         modelPosition: "0 0.2 0",
         modelRotation: "0 0 0",
         quiz: {
