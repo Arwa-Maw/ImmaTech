@@ -14,9 +14,7 @@
     <div class="scanlines"></div>
     <div class="cyber-grid"></div>
 
-    <!-- ======================== -->
-    <!-- ECRAN D'ACCUEIL          -->
-    <!-- ======================== -->
+    <!-- ECRAN D'ACCUEIL -->
     <div id="welcome-screen" class="overlay">
         <div class="welcome-container">
             <div class="logo-icon">
@@ -39,6 +37,36 @@
                 INITIALISER
             </button>
             <p class="hint">Imprimez ou affichez le marqueur HIRO sur un ecran</p>
+        </div>
+    </div>
+
+    <!-- HUD -->
+    <div id="hud" class="hud hidden">
+        <div class="hud-top">
+            <div class="progress-container">
+                <div class="progress-label">
+                    <span id="step-label">ETAPE 1/7</span>
+                    <span id="score-label">SCORE 0</span>
+                </div>
+                <div class="progress-bar">
+                    <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+        <div id="component-name" class="component-name"></div>
+        <div id="loading-model" class="loading-model">CHARGEMENT MODELE 3D...</div>
+        <div id="instruction-panel" class="instruction-panel">
+            <p id="instruction-text">Scannez le marqueur pour initialiser...</p>
+        </div>
+        <div id="quiz-panel" class="quiz-panel hidden">
+            <h3 id="quiz-question">Question</h3>
+            <div id="quiz-options" class="quiz-options"></div>
+            <div id="quiz-feedback" class="quiz-feedback hidden"></div>
+        </div>
+        <div class="hud-bottom">
+            <button id="btn-action" class="btn-action hidden" onclick="handleAction()">
+                VALIDER
+            </button>
         </div>
     </div>
 
